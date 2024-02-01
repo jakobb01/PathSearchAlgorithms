@@ -1,0 +1,1 @@
+Visualization of most popular path searching algorithms on a simple matrix.
