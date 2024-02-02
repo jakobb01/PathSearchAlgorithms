@@ -87,11 +87,12 @@ class Spot:
         return False
 
 
-def h(p1, p2): # heuristic function
+def h(p1, p2):  # heuristic function
     x1, y1 = p1
     x2, y2 = p2
     # manhattan distance
     return abs(x1 - x2) + abs(y1 - y2)
+
 
 def reconstruct_path(came_from, current, draw):
     while current in came_from:
@@ -101,8 +102,7 @@ def reconstruct_path(came_from, current, draw):
 
 
 def algorithm(draw, grid, start, end):
-
-    # astar here, move later and adapt
+    # astar here, move to separate file and implement more algorithms
     count = 0
     open_set = PriorityQueue()
     open_set.put((0, count, start))
@@ -119,7 +119,11 @@ def algorithm(draw, grid, start, end):
         # just in case algo gets stuck
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.QUIT
+                pygame.quit()
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    return False
 
         current = open_set.get()[2]
         open_set_hash.remove(current)
@@ -149,7 +153,8 @@ def algorithm(draw, grid, start, end):
             current.make_closed()
 
     return False
-    # call the correct algorithm
+    # logic to call the chosen algorithm
+
 
 def make_grid(rows, width):
     grid = []
@@ -238,7 +243,7 @@ def main(win, width):
                     end = None
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and not started:
+                if event.key == pygame.K_SPACE and not started and start is not None and end is not None:
                     for row in grid:
                         for spot in row:
                             spot.update_neighbors(grid)
