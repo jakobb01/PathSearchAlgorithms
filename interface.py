@@ -71,7 +71,7 @@ class Spot:
 
     def update_neighbors(self, grid):
         self.neighbors = []
-        if self.row < self.total_rows - 1 and not grid[self.row - 1][self.col].is_barrier():  # DOWN
+        if self.row < self.total_rows - 1 and not grid[self.row + 1][self.col].is_barrier():  # DOWN
             self.neighbors.append(grid[self.row + 1][self.col])
 
         if self.row > 0 and not grid[self.row - 1][self.col].is_barrier():  # UP
@@ -87,17 +87,69 @@ class Spot:
         return False
 
 
-def h(p1, p2):
+def h(p1, p2): # heuristic function
     x1, y1 = p1
     x2, y2 = p2
     # manhattan distance
     return abs(x1 - x2) + abs(y1 - y2)
 
+def reconstruct_path(came_from, current, draw):
+    while current in came_from:
+        current = came_from[current]
+        current.make_path()
+        draw()
+
 
 def algorithm(draw, grid, start, end):
-    # call the correct algorithm
-    pass
 
+    # astar here, move later and adapt
+    count = 0
+    open_set = PriorityQueue()
+    open_set.put((0, count, start))
+    came_from = {}
+    g_score = {spot: float("inf") for row in grid for spot in row}
+    g_score[start] = 0
+
+    f_score = {spot: float("inf") for row in grid for spot in row}
+    f_score[start] = h(start.get_pos(), end.get_pos())
+
+    open_set_hash = {start}
+
+    while not open_set.empty():
+        # just in case algo gets stuck
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.QUIT
+
+        current = open_set.get()[2]
+        open_set_hash.remove(current)
+
+        if current == end:
+            reconstruct_path(came_from, end, draw)
+            end.make_end()
+            start.make_start()
+            return True
+
+        for neighbour in current.neighbors:
+            temp_g_score = g_score[current] + 1
+
+            if temp_g_score < g_score[neighbour]:
+                came_from[neighbour] = current
+                g_score[neighbour] = temp_g_score
+                f_score[neighbour] = temp_g_score + h(neighbour.get_pos(), end.get_pos())
+                if neighbour not in open_set_hash:
+                    count += 1
+                    open_set.put((f_score[neighbour], count, neighbour))
+                    open_set_hash.add(neighbour)
+                    neighbour.make_open()
+
+        draw()
+
+        if current != start:
+            current.make_closed()
+
+    return False
+    # call the correct algorithm
 
 def make_grid(rows, width):
     grid = []
@@ -191,6 +243,11 @@ def main(win, width):
                         for spot in row:
                             spot.update_neighbors(grid)
                     algorithm(lambda: draw(win, grid, rows, width), grid, start, end)
+
+                if event.key == pygame.K_c:
+                    start = None
+                    end = None
+                    grid = make_grid(rows, width)
 
     pygame.quit()
 
