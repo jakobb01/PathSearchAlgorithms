@@ -1,6 +1,6 @@
 import pygame
 import math
-from queue import PriorityQueue
+from queue import PriorityQueue, Queue
 
 WIDTH = 800
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
@@ -156,6 +156,39 @@ def algorithm(draw, grid, start, end):
     # logic to call the chosen algorithm
 
 
+def bfs(draw, grid, start, end):
+    q = Queue()
+    q.put(start)
+    came_from = {}
+    visited = {start}
+
+    while not q.empty():
+        current = q.get()
+
+        # we found the end spot
+        if current is end:
+            reconstruct_path(came_from, end, draw)
+            end.make_end()
+            start.make_start()
+            return True
+
+        # searching for the end spot
+        for neighbour in current.neighbors:
+            if neighbour not in visited:
+                visited.add(neighbour)
+                came_from[neighbour] = current
+                q.put(neighbour)
+                neighbour.make_open()
+
+        draw()
+
+        if current != start:
+            current.make_closed()
+
+    return False
+
+
+
 def make_grid(rows, width):
     grid = []
     gap = width // rows
@@ -247,7 +280,7 @@ def main(win, width):
                     for row in grid:
                         for spot in row:
                             spot.update_neighbors(grid)
-                    algorithm(lambda: draw(win, grid, rows, width), grid, start, end)
+                    bfs(lambda: draw(win, grid, rows, width), grid, start, end)
 
                 if event.key == pygame.K_c:
                     start = None
