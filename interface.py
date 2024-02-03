@@ -195,8 +195,6 @@ def dfs(draw, grid, start, end):
     s = deque()
     came_from = {}
     visited = []
-    # s.append(x)
-    # x = s.pop()
 
     s.append(start)
 
@@ -231,6 +229,37 @@ def d_star(draw, grid, start, end):
     return False
 
 
+def best_first_search(draw, grid, start, end):
+    # algorithm only cares how close is it to the end target, it is not guaranteed not produce the best path
+    pq = PriorityQueue()
+    came_from = {}
+    visited = {start}
+
+    pq.put((h(start.get_pos(), end.get_pos()), start))
+    while not pq.empty():
+        current = pq.get()[1]
+
+        if current is end:
+            reconstruct_path(came_from, end, draw)
+            end.make_end()
+            start.make_start()
+            return True
+
+        for neighbor in current.neighbors:
+            if neighbor not in visited:
+                visited.add(neighbor)
+                pq.put((h(neighbor.get_pos(), end.get_pos()), neighbor))
+                came_from[neighbor] = current
+                neighbor.make_open()
+
+        draw()
+
+        if current != start:
+            current.make_closed()
+
+    return False
+
+
 def make_grid(rows, width):
     grid = []
     gap = width // rows
@@ -243,7 +272,14 @@ def make_grid(rows, width):
     return grid
 
 
-def make_maze(grid, rows, width):
+def remove_algo_path(grid):
+    for row in grid:
+        for spot in row:
+            if spot.color == RED or spot.color == YELLOW or spot.color == GREEN:
+                spot.reset()
+
+
+def make_maze(grid):
     for row in grid:
         for spot in row:
             x = random.randint(0, 3)
@@ -326,19 +362,29 @@ def main(win, width):
                     end = None
 
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and not started and start is not None and end is not None:
+                if not started and start is not None and end is not None:
                     for row in grid:
                         for spot in row:
                             spot.update_neighbors(grid)
-                    dfs(lambda: draw(win, grid, rows, width), grid, start, end)
+                    if event.key == pygame.K_1:
+                        bfs(lambda: draw(win, grid, rows, width), grid, start, end)
+                    if event.key == pygame.K_2:
+                        best_first_search(lambda: draw(win, grid, rows, width), grid, start, end)
+                    if event.key == pygame.K_3:
+                        algorithm(lambda: draw(win, grid, rows, width), grid, start, end)
+                    if event.key == pygame.K_4:
+                        dfs(lambda: draw(win, grid, rows, width), grid, start, end)
 
                 if event.key == pygame.K_c:
                     start = None
                     end = None
                     grid = make_grid(rows, width)
 
+                if event.key == pygame.K_SPACE:
+                    remove_algo_path(grid)
+
                 if event.key == pygame.K_m:
-                    make_maze(grid, rows, width)
+                    make_maze(grid)
 
     pygame.quit()
 
