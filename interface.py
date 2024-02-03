@@ -1,6 +1,7 @@
 import pygame
 import math
 from queue import PriorityQueue, Queue
+from collections import deque
 
 WIDTH = 800
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
@@ -188,6 +189,44 @@ def bfs(draw, grid, start, end):
     return False
 
 
+def dfs(draw, grid, start, end):
+    s = deque()
+    came_from = {}
+    visited = {start}
+    # s.append(x)
+    # x = s.pop()
+
+    s.append(start)
+
+    while not len(s) == 0:
+        current = s.pop()
+
+        if current is end:
+            reconstruct_path(came_from, end, draw)
+            end.make_end()
+            start.make_start()
+            return True
+
+        if current is start:
+            for neighbour in current.neighbors:
+                came_from[neighbour] = current
+                s.append(neighbour)
+                neighbour.make_open()
+
+        if current not in visited:
+            visited.add(current)
+            for neighbour in current.neighbors:
+                came_from[neighbour] = current
+                s.append(neighbour)
+                neighbour.make_open()
+
+        draw()
+
+        if current != start:
+            current.make_closed()
+
+    return False
+
 
 def make_grid(rows, width):
     grid = []
@@ -280,7 +319,7 @@ def main(win, width):
                     for row in grid:
                         for spot in row:
                             spot.update_neighbors(grid)
-                    bfs(lambda: draw(win, grid, rows, width), grid, start, end)
+                    dfs(lambda: draw(win, grid, rows, width), grid, start, end)
 
                 if event.key == pygame.K_c:
                     start = None
