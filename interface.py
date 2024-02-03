@@ -193,7 +193,7 @@ def bfs(draw, grid, start, end):
 def dfs(draw, grid, start, end):
     s = deque()
     came_from = {}
-    visited = {start}
+    visited = []
     # s.append(x)
     # x = s.pop()
 
@@ -208,18 +208,13 @@ def dfs(draw, grid, start, end):
             start.make_start()
             return True
 
-        if current is start:
-            for neighbour in current.neighbors:
-                came_from[neighbour] = current
-                s.append(neighbour)
-                neighbour.make_open()
-
         if current not in visited:
-            visited.add(current)
-            for neighbour in current.neighbors:
-                came_from[neighbour] = current
-                s.append(neighbour)
-                neighbour.make_open()
+            visited.append(current)
+            for neighbor in current.neighbors:
+                if neighbor not in visited:
+                    came_from[neighbor] = current
+                s.append(neighbor)
+                neighbor.make_open()
 
         draw()
 
@@ -227,6 +222,11 @@ def dfs(draw, grid, start, end):
             current.make_closed()
 
     return False
+
+
+def d_star(draw, grid, start, end):
+    open_list = {}
+    pass
 
 
 def make_grid(rows, width):
@@ -328,7 +328,7 @@ def main(win, width):
                     for row in grid:
                         for spot in row:
                             spot.update_neighbors(grid)
-                    algorithm(lambda: draw(win, grid, rows, width), grid, start, end)
+                    dfs(lambda: draw(win, grid, rows, width), grid, start, end)
 
                 if event.key == pygame.K_c:
                     start = None
