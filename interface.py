@@ -2,6 +2,7 @@ import pygame
 import math
 from queue import PriorityQueue, Queue
 from collections import deque
+import random
 
 WIDTH = 800
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
@@ -240,6 +241,14 @@ def make_grid(rows, width):
     return grid
 
 
+def make_maze(grid, rows, width):
+    for row in grid:
+        for spot in row:
+            x = random.randint(0, 3)
+            if x == 2:
+                spot.make_barrier()
+
+
 def draw_grid(win, rows, width):
     gap = width // rows
     for i in range(rows):
@@ -319,12 +328,15 @@ def main(win, width):
                     for row in grid:
                         for spot in row:
                             spot.update_neighbors(grid)
-                    dfs(lambda: draw(win, grid, rows, width), grid, start, end)
+                    algorithm(lambda: draw(win, grid, rows, width), grid, start, end)
 
                 if event.key == pygame.K_c:
                     start = None
                     end = None
                     grid = make_grid(rows, width)
+
+                if event.key == pygame.K_m:
+                    make_maze(grid, rows, width)
 
     pygame.quit()
 
