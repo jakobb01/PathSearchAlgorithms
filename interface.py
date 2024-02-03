@@ -104,7 +104,7 @@ def reconstruct_path(came_from, current, draw):
 
 
 def algorithm(draw, grid, start, end):
-    # astar here, move to separate file and implement more algorithms
+    # astar algorithm
     count = 0
     open_set = PriorityQueue()
     open_set.put((0, count, start))
@@ -159,6 +159,7 @@ def algorithm(draw, grid, start, end):
 
 
 def bfs(draw, grid, start, end):
+    # grid attribute not needed here
     q = Queue()
     q.put(start)
     came_from = {}
@@ -203,6 +204,7 @@ def dfs(draw, grid, start, end):
         current = s.pop()
 
         if current is end:
+            # reconstruct path can be improved
             reconstruct_path(came_from, end, draw)
             end.make_end()
             start.make_start()
@@ -225,8 +227,8 @@ def dfs(draw, grid, start, end):
 
 
 def d_star(draw, grid, start, end):
-    open_list = {}
-    pass
+    # future expansion
+    return False
 
 
 def make_grid(rows, width):
